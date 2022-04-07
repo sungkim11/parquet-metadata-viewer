@@ -1,2 +1,2 @@
-# rust-parquet-metadata-viewer
+# parquet-metadata-viewer
 Parquet Metadata Reader
