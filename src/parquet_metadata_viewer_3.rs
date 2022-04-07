@@ -21,7 +21,7 @@ struct Cli {
     is_partitioned: String,
 }
 
-pub fn rust_parquet(){
+pub fn parquet_metadata_viewer_file(){
 
     let args = Cli::parse();
     let path = Path::new(&args.filename);
@@ -38,10 +38,11 @@ pub fn rust_parquet(){
         println!("Parquet dataset column names and data types (both Parquet and Rust):");
         
         for (order, column) in fields.iter().enumerate() {
-            let name = column.name();
             
+            let name = column.name();
             let data_type = column.get_physical_type();
-            // print type names you'd need if a Rust program consumed the data...
+            let column_stat = parquet_metadata.row_groups()[0].columns()[order].statistics();
+
             let rust_type = match data_type {					
                 PhysicalType::FIXED_LEN_BYTE_ARRAY  => "String",
                 PhysicalType::BYTE_ARRAY            => "String",
@@ -51,14 +52,14 @@ pub fn rust_parquet(){
                 PhysicalType::DOUBLE                => "f64",
                 _ =>panic!("Cannot convert this parquet file, unhandled data type for column {}", name),									
             };
-            println!("#: {} | Name: {} | Data Type: {} | Rust Type: {}", order, name, data_type, rust_type);
+            println!("#: {:<5} | Name: {:10} | Data Type: {:10} | Rust Type: {:10} | Statistics: {:?}", order, name, data_type, rust_type, column_stat.unwrap());
         }        
         println!("");
         println!("Parquet dataset - number of rows: {}", rows);  
     }
 }
 
-pub fn rust_parquet_partition(){
+pub fn parquet_metadata_viewer_partition(){
 
     let args = Cli::parse();
     let path = args.partition_path;
@@ -76,7 +77,6 @@ pub fn rust_parquet_partition(){
             let parquet_metadata = reader.metadata();
             let rows = parquet_metadata.file_metadata().num_rows();
             total_rows = total_rows + rows;
-                        
             let fields = parquet_metadata.file_metadata().schema().get_fields();
     
             println!("Parquet dataset filename: {}", entry.unwrap().display());
@@ -84,10 +84,11 @@ pub fn rust_parquet_partition(){
             println!("Parquet dataset column names and data types (both Parquet and Rust):");
          
             for (order, column) in fields.iter().enumerate() {
+
                 let name = column.name();
-                
                 let data_type = column.get_physical_type();
-                // print type names you'd need if a Rust program consumed the data...
+                let column_stat = parquet_metadata.row_groups()[0].columns()[order].statistics();
+                
                 let rust_type = match data_type {					
                     PhysicalType::FIXED_LEN_BYTE_ARRAY  => "String",
                     PhysicalType::BYTE_ARRAY            => "String",
@@ -97,7 +98,7 @@ pub fn rust_parquet_partition(){
                     PhysicalType::DOUBLE                => "f64",
                     _ =>panic!("Cannot convert this parquet file, unhandled data type for column {}", name),									
                 };
-                println!("#: {} | Name: {} | Data Type: {} | Rust Type: {}", order, name, data_type, rust_type);
+                println!("#: {:<5} | Name: {:10} | Data Type: {:10} | Rust Type: {:10} | Statistics: {:?}", order, name, data_type, rust_type, column_stat.unwrap());
             }        
             print_total_records(total_rows);
         }

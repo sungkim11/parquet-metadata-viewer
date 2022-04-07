@@ -1,5 +1,7 @@
 
 use parquet::file::reader::{FileReader, SerializedFileReader};
+//use parquet::schema::printer::{print_file_metadata, print_parquet_metadata, print_schema};
+
 use std::{fs::File, path::Path};
 use clap::Parser;
 
@@ -11,7 +13,7 @@ struct Cli {
     filename: String,
 }
 
-pub fn rust_parquet(){
+pub fn parquet_metadata_viewer(){
 
     let args = Cli::parse();
     let path = Path::new(&args.filename);
@@ -20,6 +22,15 @@ pub fn rust_parquet(){
 
         let reader = SerializedFileReader::new(file).unwrap();
         let parquet_metadata = reader.metadata();
+
+        //print_parquet_metadata(&mut std::io::stdout(), &parquet_metadata);
+        //print_file_metadata(&mut std::io::stdout(), &parquet_metadata.file_metadata());
+    
+        //print_schema(
+        //    &mut std::io::stdout(),
+        //    &parquet_metadata.file_metadata().schema(),
+        //);
+
         let rows = parquet_metadata.file_metadata().num_rows();
         let fields = parquet_metadata.file_metadata().schema().get_fields();
 
